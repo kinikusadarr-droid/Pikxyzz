@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>PIKxyzz</title>
     <style>
+        .glitch {
+    font-size: 1.8rem;
+    font-weight: 700;
+    position: relative;
+    display: inline-block;
+    animation: glitch 1.5s infinite;
+    letter-spacing: 1px;
+}
+
+@keyframes glitch {
+    0% { text-shadow: 2px 2px #ff0040, -2px -2px #00d2ff; }
+    25% { text-shadow: -2px 2px #ff0040, 2px -2px #00d2ff; }
+    50% { text-shadow: 2px -2px #ff0040, -2px 2px #00d2ff; }
+    75% { text-shadow: -2px -2px #ff0040, 2px 2px #00d2ff; }
+    100% { text-shadow: 2px 2px #ff0040, -2px -2px #00d2ff; }
+}
+
+/* Biar verified icon tetap stabil */
+.verified {
+    animation: none !important;
+    text-shadow: none !important;
+}
         * {
             margin: 0;
             padding: 0;
@@ -212,7 +234,7 @@
         </div>
 
         <div class="nama">
-            Pikxyzz <span class="verified"><i class="fas fa-check"></i></span>
+    <span class="glitch">Pikxyzz</span> <span class="verified"><i class="fas fa-check"></i></span>
         </div>
         <div class="bio" id="typing-text"></div>
 
