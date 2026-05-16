@@ -214,7 +214,7 @@
         <div class="nama">
             Pikxyzz <span class="verified"><i class="fas fa-check"></i></span>
         </div>
-        <div class="bio">PRO PLAYER EPEP🤡  </div>
+        <div class="bio" id="typing-text"></div>
 
         <!-- Tombol – Saweria & GitHub dihapus sesuai perintah -->
         <a href="https://www.tiktok.com/@xsender_0101" class="btn-link tiktok" target="_blank">
@@ -240,6 +240,28 @@
 
     <!-- Optional: script kecil untuk efek lebih (bisa tambahin sendiri) -->
     <script>
+        
+    const text = "PRO PLAYER EPEP🤡";
+    let index = 0;
+    const element = document.getElementById('typing-text');
+
+    function typeEffect() {
+        if (index < text.length) {
+            element.innerHTML += text.charAt(index);
+            index++;
+            setTimeout(typeEffect, 100); // kecepatan ngetik (makin kecil makin cepat)
+        } else {
+            // Setelah selesai, diam dulu, lalu hapus & ulang
+            setTimeout(() => {
+                element.innerHTML = "";
+                index = 0;
+                typeEffect();
+            }, 3000); // jeda 3 detik sebelum ulang
+        }
+    }
+
+    typeEffect();
+
         // Kosong, tapi siap dikembangkan
         console.log('🔥 Pikxyzz — Link Tree by XYZZ');
     </script>
