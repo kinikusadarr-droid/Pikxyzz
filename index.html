@@ -198,29 +198,16 @@
 <audio id="bgm" loop>
     <source src="audio.mp3" type="audio/mpeg">
 </audio>
-
-<!-- Tombol play/pause -->
-<button id="audioBtn" style="position:fixed; bottom:20px; right:20px; z-index:999; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; border-radius:50%; width:50px; height:50px; font-size:24px; cursor:pointer; backdrop-filter:blur(4px);">
-    🔇
-</button>
-
 <script>
     const audio = document.getElementById('bgm');
-    const btn = document.getElementById('audioBtn');
-    let isPlaying = false;
-
-    btn.addEventListener('click', function() {
-        if (isPlaying) {
-            audio.pause();
-            btn.textContent = '🎵';
-            isPlaying = false;
-        } else {
+    audio.play().catch(() => {
+        // Gagal autoplay, fallback ke klik
+        document.addEventListener('click', function() {
             audio.play();
-            btn.textContent = '🌚';
-            isPlaying = true;
-        }
+        });
     });
-        </script>
+</script>
+
 
     
     <video class="bg-anime" autoplay loop muted playsinline>
