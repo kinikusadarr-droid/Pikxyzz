@@ -9,7 +9,7 @@
 <style>
   :root {
     --ink: #000;
-    --paper: #fffdf5;
+    --paper: rgba(255, 253, 245, 0.82);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -36,15 +36,16 @@
     object-fit: cover;
     z-index: 0;
     pointer-events: none;
-    filter: saturate(1.2) contrast(1.05);
   }
+  /* Lapisan putih transparan biar background gak terlalu putih */
   .bg-tint {
     position: fixed;
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background-image: radial-gradient(rgba(0,0,0,.55) 1px, transparent 1px);
-    background-size: 22px 22px;
+    background:
+      radial-gradient(rgba(0,0,0,.35) 1px, transparent 1px) 0 0 / 22px 22px,
+      rgba(255, 255, 255, 0.35);
   }
 
   /* ===== CARD ===== */
@@ -54,6 +55,8 @@
     width: 100%;
     max-width: 420px;
     background: var(--paper);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
     border: 4px solid var(--ink);
     box-shadow: 10px 10px 0 var(--ink);
     padding: 28px 22px 22px;
@@ -61,6 +64,9 @@
     flex-direction: column;
     align-items: center;
     gap: 16px;
+    transform-style: preserve-3d;
+    transform: perspective(900px) rotateX(var(--crx, 0deg)) rotateY(var(--cry, 0deg));
+    transition: transform .25s ease-out, box-shadow .25s ease;
   }
 
   /* ===== AVATAR (bisa di-drag) ===== */
@@ -113,8 +119,16 @@
     align-items: center;
     gap: 8px;
     transition: transform .2s ease;
+    cursor: pointer;
+    user-select: none;
   }
   .nama:hover { transform: rotate(2deg) scale(1.04); }
+  .nama.shake { animation: shake .4s steps(4); }
+  @keyframes shake {
+    0%, 100% { transform: rotate(-2deg); }
+    25% { transform: rotate(-6deg) translateX(-3px); }
+    75% { transform: rotate(2deg) translateX(3px); }
+  }
 
   .verified {
     background: #00e5ff;
@@ -162,14 +176,13 @@
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
-    transition: transform .1s ease, box-shadow .1s ease;
+    position: relative;
+    transition: transform .15s ease, box-shadow .1s ease;
   }
   .btn:hover {
-    transform: translate(-2px, -2px);
     box-shadow: 7px 7px 0 var(--ink);
   }
   .btn:active {
-    transform: translate(5px, 5px);
     box-shadow: 0 0 0 var(--ink);
   }
   .btn:focus-visible {
@@ -210,6 +223,19 @@
     font-weight: 700;
     letter-spacing: 1px;
     padding: 4px 10px;
+  }
+
+  /* ===== SPARKLE saat klik ===== */
+  .spark {
+    position: fixed;
+    z-index: 4;
+    pointer-events: none;
+    font-size: 1.1rem;
+    transform: translate(-50%, -50%);
+    animation: pop .6s ease-out forwards;
+  }
+  @keyframes pop {
+    to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.4) rotate(160deg); opacity: 0; }
   }
 
   /* ===== TOAST ===== */
@@ -257,7 +283,7 @@
     <span class="hint">tarik fotonya!</span>
   </div>
 
-  <div class="nama">
+  <div class="nama" id="nama">
     Pikxyzz <span class="verified"><i class="fas fa-check"></i></span>
   </div>
 
@@ -281,7 +307,7 @@
     <span class="arrow">›</span>
   </a>
 
-  <a href="https://wa.me/6289669880306" class="btn whatsapp" target="_blank" rel="noopener" data-name="WhatsApp">
+  <a href="https://wa.me/6285875818570" class="btn whatsapp" target="_blank" rel="noopener" data-name="WhatsApp">
     <span class="ic"><i class="fab fa-whatsapp"></i></span>
     <span class="label">WhatsApp</span>
     <span class="arrow">›</span>
@@ -312,8 +338,6 @@
   audio.play().then(() => { musicStarted = true; }).catch(() => {});
   document.addEventListener('click', startMusic);
   document.addEventListener('touchstart', startMusic, { passive: true });
-
-  // Video background jalan terus, tapi kalau gagal dimuat tidak ganggu halaman
   bgVideo.play().catch(() => {});
 
   // ===== Avatar bisa di-drag (mouse & sentuh) =====
@@ -377,6 +401,55 @@
   window.addEventListener('touchmove', onMove, { passive: true });
   window.addEventListener('touchend', onUp);
 
+  // ===== Card miring 3D ngikutin kursor (desktop) =====
+  const card = document.getElementById('card');
+  card.addEventListener('mousemove', (e) => {
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.setProperty('--cry', (x * 6) + 'deg');
+    card.style.setProperty('--crx', (-y * 6) + 'deg');
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.setProperty('--cry', '0deg');
+    card.style.setProperty('--crx', '0deg');
+  });
+
+  // ===== Tombol sedikit ketarik ke arah kursor =====
+  document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+      const r = btn.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width / 2) / r.width * 6;
+      const y = (e.clientY - r.top - r.height / 2) / r.height * 6;
+      btn.style.transform = `translate(${x}px, ${y}px)`;
+    });
+    btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+  });
+
+  // ===== Sparkle kecil tiap klik di mana aja =====
+  const emojis = ['✨', '⭐', '💥', '🔥'];
+  document.addEventListener('click', (e) => {
+    for (let i = 0; i < 4; i++) {
+      const s = document.createElement('span');
+      s.className = 'spark';
+      s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      s.style.left = e.clientX + 'px';
+      s.style.top = e.clientY + 'px';
+      s.style.setProperty('--dx', (Math.random() * 80 - 40) + 'px');
+      s.style.setProperty('--dy', (Math.random() * 80 - 60) + 'px');
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 650);
+    }
+  });
+
+  // ===== Nama goyang pas diklik =====
+  const nama = document.getElementById('nama');
+  nama.addEventListener('click', () => {
+    nama.classList.remove('shake');
+    void nama.offsetWidth;
+    nama.classList.add('shake');
+  });
+
   // ===== Toast saat klik link =====
   const toast = document.getElementById('toast');
   let toastTimer;
@@ -393,7 +466,7 @@
   });
 
   // ===== Typing text =====
-  const phrases = ['CONTACT ME', 'LINK DI BAWAH 👇', 'PIKY GANZ'];
+  const phrases = ['CONTACT ME', 'LINK DI BAWAH 👇', 'PIKY GANTENG!'];
   const tagEl = document.getElementById('typing-text');
   let p = 0, i = 0, deleting = false;
 
